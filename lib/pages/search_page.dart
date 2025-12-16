@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:review_film/data/film_data.dart';
+import 'package:review_film/model/film_model.dart';
 import 'package:review_film/widgets/film_card.dart';
 
 class SearchPage extends StatelessWidget {
@@ -44,7 +46,7 @@ class SearchPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(5),
               child: GridView.builder(
-                itemCount: 6,
+                itemCount: filmList.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
@@ -52,7 +54,8 @@ class SearchPage extends StatelessWidget {
                   childAspectRatio: 0.7,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-                  return FilmCard();
+                  final Film film =filmList[index];
+            return FilmCard(film: film,);
                 },
               ),
             ),

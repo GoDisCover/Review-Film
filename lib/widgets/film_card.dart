@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:review_film/model/film_model.dart';
 
 class FilmCard extends StatelessWidget {
-  const FilmCard({super.key});
+  final Film film;
+  const FilmCard({super.key, required this.film});
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -17,13 +19,11 @@ class FilmCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: GestureDetector(
-                onTap: () {
-                  print('Test');
-                },
+                onTap: () {},
                 child: Stack(
                   children: [
                     Image.network(
-                      'https://cdn.myanimelist.net/images/anime/1255/110636.jpg',
+                      film.imageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,
@@ -33,8 +33,7 @@ class FilmCard extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: <Color>[Color(0x0057564F), Color(0xFF57564F)],
-                          stops: [0.5, 1.0],
+                          colors: <Color>[Color(0x00000000), Color(0xFF21201e)],
                         ),
                       ),
                     ),
@@ -52,9 +51,9 @@ class FilmCard extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star, color: Colors.black),
+                                Icon(Icons.star, color: Color(0xffF8F3CE)),
                                 SizedBox(width: 4),
-                                Text("4.9/5"),
+                                Text(film.rating.toString(),style: TextStyle(color: Color(0xffF8F3CE))),
                               ],
                             ),
                           ),
@@ -63,37 +62,52 @@ class FilmCard extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Yuru Camp",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(width: 100),
+                          Text(
+                            film.namaFilm,
+                            style: TextStyle(
+                              color: Color(0xffF8F3CE),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                "Watching",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                          ),
+                          SizedBox(height: 4),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics:
+                                NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 3,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
+                            padding: EdgeInsets.all(4),
+                            itemCount: film.genre.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  film.genre[index],
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -104,30 +118,5 @@ class FilmCard extends StatelessWidget {
         ],
       ),
     );
-    // SizedBox(
-    //   child: GestureDetector(
-    //     onTap: () {
-    //       print('Test');
-    //     },
-    //     child: Stack(
-    //       children: [
-    //         Image.network(
-    //           'https://cdn.myanimelist.net/images/anime/1255/110636.jpg',
-    //           fit: BoxFit.cover,
-    //         ),
-    //         Container(
-    //           decoration: const BoxDecoration(
-    //             gradient: LinearGradient(
-    //               begin: Alignment.topCenter,
-    //               end: Alignment.bottomCenter,
-    //               colors: <Color>[Color(0x0057564F), Color(0xFF57564F)],
-    //               stops: [0.5, 1.0],
-    //             ),
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
