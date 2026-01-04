@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:review_film/main.dart';
 import 'register_page.dart';
 import 'my_review_page.dart';
 
@@ -39,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
         // Navigate to main content (MyReviewPage)
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const MyReviewPage()),
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
     } catch (e) {

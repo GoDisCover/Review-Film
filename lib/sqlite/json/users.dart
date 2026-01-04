@@ -1,0 +1,33 @@
+import 'dart:convert';
+
+Users usersFromMap(String str) => Users.fromMap(json.decode(str));
+
+String usersToMap(Users data) => json.encode(data.toMap());
+
+class Users {
+    final int? id;
+    final String? name;
+    final String email;
+    final String password;
+
+    Users({
+        this.id,
+        this.name,
+        required this.email,
+        required this.password,
+    });
+
+    factory Users.fromMap(Map<String, dynamic> json) => Users(
+        id: json["id"],
+        name: json["name"],
+        email: json["email"],
+        password: json["password"],
+    );
+
+    Map<String, dynamic> toMap() => {
+        "id": id,
+        "name": name,
+        "email": email,
+        "password": password,
+    };
+}
