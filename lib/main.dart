@@ -3,9 +3,30 @@ import 'package:review_film/pages/my_review_page.dart';
 import 'package:review_film/pages/profile_page.dart';
 import 'package:review_film/pages/search_page.dart';
 import 'pages/login_page.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'sqlite/database_helper.dart';
 
-void main() {
+void main() async {
+  // ✅ TAMBAHKAN async
+  WidgetsFlutterBinding.ensureInitialized(); // ✅ TAMBAHKAN INI
+
+  // ✅ TAMBAHKAN - Inisialisasi database untuk non-web platform
+  if (!kIsWeb) {
+    try {
+      await _initializeDatabase();
+    } catch (e) {
+      print('❌ Error initializing database: $e');
+    }
+  }
+
   runApp(const MyApp());
+}
+
+Future<void> _initializeDatabase() async {
+  final dbHelper = DatabaseHelper();
+  print('Checking database status...');
+  await dbHelper.initDB();
+  print('Database initialized successfully.');
 }
 
 class MyApp extends StatelessWidget {
@@ -45,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
           ],
           currentIndex: _curentIndex,
           selectedItemColor: Colors.amber[800],
-          
+
           showUnselectedLabels: false,
           onTap: (index) {
             setState(() {

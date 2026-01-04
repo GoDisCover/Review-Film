@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:review_film/sqlite/database_helper.dart';
+import 'package:review_film/sqlite/json/users.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -14,7 +16,53 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
   bool _isLoading = false;
+  final db = DatabaseHelper();
+  
+  signUp () async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      var user = Users(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      var result = await db.register(user);
+
+      if (!mounted) return;
+
+      if (result > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration Successful')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration Failed')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
   @override
   void dispose() {
     _emailController.dispose();
@@ -43,35 +91,35 @@ class _RegisterPageState extends State<RegisterPage> {
     return null;
   }
 
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
+  // Future<void> _register() async {
+  //   if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    try {
-      // Simulate network request
-      await Future.delayed(const Duration(seconds: 1));
+  //   setState(() => _isLoading = true);
+  //   try {
+  //     // Simulate network request
+  //     await Future.delayed(const Duration(seconds: 1));
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful')),
-        );
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Registration successful')),
+  //       );
 
-        // Navigate back to LoginPage
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
+  //       // Navigate back to LoginPage
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(builder: (_) => const LoginPage()),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Registration failed: $e')),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) setState(() => _isLoading = false);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +202,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7C776A),
                     ),
-                    onPressed: _isLoading ? null : _register,
+                    onPressed: _isLoading ? null : signUp,
                     child: _isLoading
                         ? const SizedBox(
                             height: 16,

@@ -21,7 +21,7 @@ class DatabaseHelper {
     return openDatabase(
       path,
       version: 1,
-      onCreate: (db, version){
+      onCreate: (db, version) {
         db.execute(user);
       },
     );
@@ -29,23 +29,26 @@ class DatabaseHelper {
   //FUNCTION METHOD
 
   //AUTHENTICATION
-  Future<bool> authenticate(Users usr)async{
+  Future<bool> authenticate(Users usr) async {
     final Database db = await initDB();
-    var result = await db.query("select * from user where email = '${usr.email}' and password = '${usr.password}'", 
-      whereArgs: [usr.email, usr.password]
+    var result = await db.query(
+      "select * from user where email = '${usr.email}' and password = '${usr.password}'",
+      whereArgs: [usr.email, usr.password],
     );
-    if(result.isNotEmpty){
+    if (result.isNotEmpty) {
       return true;
     } else {
       return false;
     }
   }
-  //SIGN UP 
+
+  //SIGN UP
   Future<int> register(Users usr) async {
     final Database db = await initDB();
     var result = await db.insert('user', usr.toMap());
     return result;
   }
+
   //GET USER DETAIL
   Future<Users?> getUserDetail(String email) async {
     final Database db = await initDB();
@@ -55,4 +58,6 @@ class DatabaseHelper {
     }
     return null;
   }
+
+
 }
