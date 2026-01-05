@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:review_film/main.dart';
 import 'package:review_film/sqlite/database_helper.dart';
@@ -44,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const MyReviewPage()),
+          MaterialPageRoute(builder: (_) =>MainScreen(userEmail: _emailController.text)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

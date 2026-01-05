@@ -7,10 +7,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'sqlite/database_helper.dart';
 
 void main() async {
-  // ✅ TAMBAHKAN async
-  WidgetsFlutterBinding.ensureInitialized(); // ✅ TAMBAHKAN INI
+  WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ TAMBAHKAN - Inisialisasi database untuk non-web platform
   if (!kIsWeb) {
     try {
       await _initializeDatabase();
@@ -25,7 +23,7 @@ void main() async {
 Future<void> _initializeDatabase() async {
   final dbHelper = DatabaseHelper();
   print('Checking database status...');
-  await dbHelper.initDB();
+  await dbHelper.database;
   print('Database initialized successfully.');
 }
 
@@ -36,41 +34,56 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // home: const LoginPage(),
-      home: LoginPage(),
+      title: 'Review Film',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF4F4A3F),
+        scaffoldBackgroundColor: const Color(0xFFD6D2C4),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F4A3F)),
+      ),
+      home: const LoginPage(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final String userEmail; 
+
+  const MainScreen({super.key, required this.userEmail});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _curentIndex = 0;
-  final List<Widget> _children = [MyReviewPage(), SearchPage(), ProfilePage()];
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> children = [
+      MyReviewPage(), 
+      SearchPage(),
+      ProfilePage(userEmail: widget.userEmail), 
+    ];
+
     return Scaffold(
-      body: _children[_curentIndex],
+      body: children[_currentIndex],
       bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(canvasColor: Colors.deepPurple),
+        data: Theme.of(context).copyWith(
+          canvasColor: const Color(0xFF4F4A3F), // Background color of nav bar
+        ),
         child: BottomNavigationBar(
-          items: [
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
-          currentIndex: _curentIndex,
-          selectedItemColor: Colors.amber[800],
-
+          currentIndex: _currentIndex,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white38,
           showUnselectedLabels: false,
           onTap: (index) {
             setState(() {
-              _curentIndex = index;
+              _currentIndex = index;
             });
           },
         ),

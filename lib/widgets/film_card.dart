@@ -4,6 +4,7 @@ import 'package:review_film/model/film_model.dart';
 class FilmCard extends StatelessWidget {
   final Film film;
   const FilmCard({super.key, required this.film});
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -19,15 +20,23 @@ class FilmCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+
+                },
                 child: Stack(
                   children: [
+
                     Image.network(
                       film.imageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(color: Colors.grey, child: Icon(Icons.error));
+                      },
                     ),
+                    
+
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -37,23 +46,33 @@ class FilmCard extends StatelessWidget {
                         ),
                       ),
                     ),
+
+
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
                         padding: const EdgeInsets.all(10),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Color(0xFF57564F),
+                            color: const Color(0xFF57564F),
                             borderRadius: BorderRadius.circular(9),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(3.5),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star, color: Color(0xffF8F3CE)),
-                                SizedBox(width: 4),
-                                Text(film.rating.toString(),style: TextStyle(color: Color(0xffF8F3CE))),
+                                const Icon(Icons.star, color: Color(0xffF8F3CE), size: 14),
+                                const SizedBox(width: 4),
+
+                                Text(
+                                  film.rating.toStringAsFixed(1), 
+                                  style: const TextStyle(
+                                    color: Color(0xffF8F3CE),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -66,42 +85,43 @@ class FilmCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          SizedBox(width: 100),
+                          const SizedBox(width: 100),
                           Text(
                             film.namaFilm,
-                            style: TextStyle(
+                            maxLines: 2, 
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               color: Color(0xffF8F3CE),
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           GridView.builder(
                             shrinkWrap: true,
-                            physics:
-                                NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 3,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                ),
-                            padding: EdgeInsets.all(4),
-                            itemCount: film.genre.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 4.0, 
+                              crossAxisSpacing: 4,
+                              mainAxisSpacing: 4,
+                            ),
+                            padding: EdgeInsets.zero,
+                            itemCount: film.genre.length, 
                             itemBuilder: (context, index) {
                               return Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: Colors.blueAccent,
+                                  color: const Color(0xFF7A7A73),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   film.genre[index],
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Color(0xFFE0D9C8),
+                                    fontSize: 10, 
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               );
