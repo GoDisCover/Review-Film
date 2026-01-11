@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:review_film/pages/my_review_page.dart';
 import 'package:review_film/pages/profile_page.dart';
 import 'package:review_film/pages/search_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/login_page.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'sqlite/database_helper.dart';
@@ -16,8 +17,10 @@ void main() async {
       print('❌ Error initializing database: $e');
     }
   }
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? savedEmail = prefs.getString('user_email');
 
-  runApp(const MyApp());
+  runApp(MyApp(initialEmail : savedEmail));
 }
 
 Future<void> _initializeDatabase() async {
@@ -28,7 +31,8 @@ Future<void> _initializeDatabase() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.initialEmail});
+  final String? initialEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +44,15 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFD6D2C4),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F4A3F)),
       ),
-      home: const LoginPage(),
+      home: initialEmail != null
+          ? MainScreen(userEmail: initialEmail!)
+          : const LoginPage(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  final String userEmail; 
+  final String userEmail;
 
   const MainScreen({super.key, required this.userEmail});
 
@@ -60,16 +66,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = [
-      MyReviewPage(), 
+      MyReviewPage(),
       SearchPage(),
-      ProfilePage(userEmail: widget.userEmail), 
+      ProfilePage(userEmail: widget.userEmail),
     ];
 
     return Scaffold(
-      body: children[_currentIndex],
+      // Menggunakan IndexedStack untuk mempertahankan state halaman saat berpindah tab
+      body: IndexedStack(
+        index: _currentIndex,
+        children: children,
+      ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: const Color(0xFF4F4A3F), // Background color of nav bar
+          canvasColor: const Color(0xFF4F4A3F),
         ),
         child: BottomNavigationBar(
           items: const [

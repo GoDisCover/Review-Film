@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:review_film/model/film_model.dart';
-import 'package:review_film/sqlite/database_helper.dart'; // Import Database
+import 'package:review_film/sqlite/database_helper.dart';
 import 'package:review_film/widgets/film_card.dart';
 
 class MyReviewPage extends StatefulWidget {
@@ -11,9 +11,9 @@ class MyReviewPage extends StatefulWidget {
 }
 
 class _MyReviewPageState extends State<MyReviewPage> {
-  // Variable untuk menampung Future data film
   late Future<List<Film>> _filmsFuture;
   final dbHelper = DatabaseHelper();
+  String _searchKeyword = "";
 
   @override
   void initState() {
@@ -34,11 +34,10 @@ class _MyReviewPageState extends State<MyReviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffDDDAD0), // Warna background krem
+      backgroundColor: const Color(0xffDDDAD0),
       body: SafeArea(
         child: Column(
           children: [
-            // --- BAGIAN 1: SEARCH BAR (Sesuai Desain) ---
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
@@ -65,48 +64,50 @@ class _MyReviewPageState extends State<MyReviewPage> {
                     border: InputBorder.none,
                   ),
                   onChanged: (value) {
-                    // Nanti bisa tambahkan logika pencarian disini
+                    setState(() {
+                      _searchKeyword = value;
+                    });
                   },
                 ),
               ),
             ),
-
-            // --- BAGIAN 2: LIST FILM DARI DATABASE ---
             Expanded(
               child: FutureBuilder<List<Film>>(
-                future: _filmsFuture, // Variable future di atas
+                future: _filmsFuture,
                 builder: (context, snapshot) {
-                  // 1. Jika sedang loading
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  }
-                  // 2. Jika ada Error
-                  else if (snapshot.hasError) {
+                  } else if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
-                  }
-                  // 3. Jika Data Kosong
-                  else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text("No films found in database"),
+                      child: Text("You haven't added any films yet"),
                     );
-                  }
-                  // 4. Jika Data Ada -> Tampilkan Grid
-                  else {
+                  } else {
                     final films = snapshot.data!;
+                    final filteredFilms = films.where((film) {
+                      return film.namaFilm
+                          .toLowerCase()
+                          .contains(_searchKeyword.toLowerCase());
+                    }).toList();
+
+                    if (filteredFilms.isEmpty) {
+                      return const Center(child: Text("Movie not found"));
+                    }
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: GridView.builder(
-                        itemCount: films.length,
+                        itemCount: filteredFilms.length,
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2, // 2 Kolom
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio:
-                                  0.65, // Sesuaikan rasio agar kartu tidak gepeng
-                            ),
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.65,
+                        ),
                         itemBuilder: (BuildContext context, int index) {
-                          final Film film = films[index];
+                          final Film film = filteredFilms[index];
                           return FilmCard(film: film);
                         },
                       ),

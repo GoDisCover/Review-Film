@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:review_film/main.dart';
 import 'package:review_film/sqlite/database_helper.dart';
 import 'package:review_film/sqlite/json/users.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'register_page.dart';
 import 'my_review_page.dart';
 
@@ -41,6 +42,8 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (result) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', _emailController.text);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login Successful')),
         );

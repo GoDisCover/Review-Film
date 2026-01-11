@@ -73,12 +73,12 @@ class _SearchPageState extends State<SearchPage> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: const Color(0xFFDDDAD0), // Adjusted color to match theme
+                color: const Color(0xFFDDDAD0),
               ),
               child: TextField(
-                controller: _searchController, // Connect controller
+                controller: _searchController,
                 autofocus: false,
-                onChanged: (value) => _runFilter(value), // Call filter on typing
+                onChanged: (value) => _runFilter(value),
                 decoration: const InputDecoration(
                   hintText: 'Search movie name...',
                   prefixIcon: Icon(Icons.search, color: Colors.black54),
