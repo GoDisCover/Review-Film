@@ -212,26 +212,6 @@ final db = DatabaseHelper();
               const SizedBox(height: 8),
               const Divider(color: Colors.white24),
               ListTile(
-                leading: const Icon(Icons.rate_review, color: Colors.white70),
-                title: const Text(
-                  'My Reviews',
-                  style: TextStyle(color: Colors.white),
-                ),
-                trailing: Text(
-                  '$_reviews',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings, color: Colors.white70),
-                title: const Text(
-                  'Settings',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {},
-              ),
-              ListTile(
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: const Text(
                   'Logout',

@@ -90,6 +90,7 @@ class _DetailScreenState extends State<DetailScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text("Cancel"),
+              
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5B584E)),

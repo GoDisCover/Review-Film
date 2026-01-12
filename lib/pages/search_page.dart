@@ -112,6 +112,9 @@ class _SearchPageState extends State<SearchPage> {
                   return FilmCard(
                     film: film,
                     userEmail: widget.userEmail ?? "",
+                    onUpdate: () {
+                      _refreshFilms(); // Refresh data setelah update
+                    },
                   );
                 },
               ),

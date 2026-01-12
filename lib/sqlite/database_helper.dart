@@ -216,11 +216,6 @@ class DatabaseHelper {
     final db = await database;
     final filmId = await _getFilmIdByName(filmTitle);
 
-    if (filmId == null) {
-      print("Film tidak ditemukan: $filmTitle");
-      return;
-    }
-
     // Cek apakah user sudah pernah review film ini
     final List<Map<String, dynamic>> check = await db.query(
       'reviews',

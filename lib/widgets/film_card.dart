@@ -2,24 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:review_film/model/film_model.dart';
 import 'package:review_film/pages/detail_screen.dart';
 
-class FilmCard extends StatelessWidget {
+class FilmCard extends StatefulWidget {
   final Film film;
   final String userEmail;
+  final VoidCallback? onUpdate;
 
   const FilmCard({
     super.key,
     required this.film,
     required this.userEmail,
+    this.onUpdate,
   });
 
+  @override
+  State<FilmCard> createState() => _FilmCardState();
+}
+
+class _FilmCardState extends State<FilmCard> {
   @override
   Widget build(BuildContext context) {
     // Logika untuk menangani genre:
     // Jika film.genre adalah String (misal: "Action, Drama"), kita split jadi List.
     // Jika model Anda sudah List<String>, kode ini tetap aman.
-    final List<String> genres = film.genre is String
-        ? (film.genre as String).split(',')
-        : (film.genre as List).map((e) => e.toString()).toList();
+    final List<String> genres = widget.film.genre is String
+        ? (widget.film.genre as String).split(',')
+        : (widget.film.genre as List).map((e) => e.toString()).toList();
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -34,21 +41,26 @@ class FilmCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  // Tunggu Navigator selesai (saat user kembali dari DetailScreen)
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => DetailScreen(
-                        film: film,
-                        userEmail: userEmail,
+                        film: widget.film,
+                        userEmail: widget.userEmail,
                       ),
                     ),
                   );
+                  if (widget.onUpdate != null) {
+                    widget.onUpdate!();
+                  }
                 },
+                
                 child: Stack(
                   children: [
                     Image.network(
-                      film.imageUrl,
+                      widget.film.imageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,
@@ -90,7 +102,7 @@ class FilmCard extends StatelessWidget {
                                     color: Color(0xffF8F3CE), size: 14),
                                 const SizedBox(width: 4),
                                 Text(
-                                  (film.rating ?? 0.0).toStringAsFixed(1),
+                                  (widget.film.rating).toStringAsFixed(1),
                                   style: const TextStyle(
                                     color: Color(0xffF8F3CE),
                                     fontSize: 12,
@@ -110,8 +122,7 @@ class FilmCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            film.namaFilm,
-                            maxLines: 2,
+                            widget.film.namaFilm,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Color(0xffF8F3CE),
@@ -123,7 +134,7 @@ class FilmCard extends StatelessWidget {
                           Wrap(
                             spacing: 4,
                             runSpacing: 4,
-                            children: genres.take(2).map((genre) {
+                            children: genres.map((genre) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),

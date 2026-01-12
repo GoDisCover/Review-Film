@@ -117,6 +117,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
                             return FilmCard(
                               film: film,
                               userEmail: widget.userEmail ?? "",
+                              onUpdate: _refreshData,
                             );
                           },
                         ),
