@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,9 +15,8 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   static Database? _database;
-  
-  // Ganti ke v3 agar database dibuat ulang dengan tabel yang LENGKAP
-  final String dbName = 'reviews_v3.db';
+
+  final String dbName = 'reviews_v5.db';
 
   // 1. Tabel User
   String userTable = '''
@@ -48,7 +46,6 @@ class DatabaseHelper {
       user_email TEXT NOT NULL,
       film_id INTEGER NOT NULL,
       rating REAL NOT NULL,
-      comment TEXT,
       date TEXT,
       FOREIGN KEY (film_id) REFERENCES films (id)
     )
@@ -81,24 +78,26 @@ class DatabaseHelper {
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  // --- PERBAIKAN PENTING DI SINI ---
   Future _onCreate(Database db, int version) async {
     await db.execute(userTable);
     await db.execute(filmTable);
     await db.execute(reviewTable);
+
+    // Insert data awal film jika ada
     if (filmList.isNotEmpty) {
       for (var film in filmList) {
         var filmMap = film.toMap();
+        // Hapus field yang tidak ada di tabel films jika model Film memiliki rating/id
         filmMap.remove('rating');
-        filmMap.remove('id'); 
-        
+        filmMap.remove('id');
+
         await db.insert('films', filmMap);
       }
     }
     print("✅ Database Berhasil Dibuat Lengkap!");
   }
 
-  // --- FUNCTION METHODS ---
+  // --- AUTH METHODS ---
 
   Future<bool> authenticate(Users usr) async {
     final db = await database;
@@ -138,11 +137,11 @@ class DatabaseHelper {
     );
   }
 
-  // --- CRUD FILM ---
+  // --- FILM METHODS ---
+
   Future<List<Film>> getAllFilms() async {
     final db = await database;
-    
-    // Gunakan LEFT JOIN untuk menghitung rata-rata rating
+    // LEFT JOIN untuk mengambil rata-rata rating global
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT 
         f.*, 
@@ -156,8 +155,10 @@ class DatabaseHelper {
       return Film.fromMap(maps[i]);
     });
   }
+
   Future<List<Film>> getMyFilms(String email) async {
     final db = await database;
+
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT 
         f.*, 
@@ -171,5 +172,97 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Film.fromMap(maps[i]);
     });
+  }
+
+  // --- RATING SPECIFIC METHODS (BARU) ---
+
+  // 1. Ambil ID Film berdasarkan Nama (Helper)
+  Future<int?> _getFilmIdByName(String filmTitle) async {
+    final db = await database;
+    final res = await db.query(
+      'films',
+      columns: ['id'],
+      where: 'nama_film = ?',
+      whereArgs: [filmTitle],
+    );
+    if (res.isNotEmpty) {
+      return res.first['id'] as int;
+    }
+    return null;
+  }
+
+  // 2. Ambil Rating User Spesifik (Your Rating)
+  Future<double> getSpecificUserRating(String email, String filmTitle) async {
+    final db = await database;
+    final filmId = await _getFilmIdByName(filmTitle);
+
+    if (filmId == null) return 0.0;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'reviews',
+      columns: ['rating'],
+      where: 'user_email = ? AND film_id = ?',
+      whereArgs: [email, filmId],
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first['rating'] as double;
+    }
+    return 0.0;
+  }
+
+  // 3. Update atau Insert Rating (Untuk Edit Rating)
+  Future<void> updateUserRating(String email, String filmTitle, double newRating) async {
+    final db = await database;
+    final filmId = await _getFilmIdByName(filmTitle);
+
+    if (filmId == null) {
+      print("Film tidak ditemukan: $filmTitle");
+      return;
+    }
+
+    // Cek apakah user sudah pernah review film ini
+    final List<Map<String, dynamic>> check = await db.query(
+      'reviews',
+      where: 'user_email = ? AND film_id = ?',
+      whereArgs: [email, filmId],
+    );
+
+    if (check.isNotEmpty) {
+      // UPDATE jika sudah ada
+      await db.update(
+        'reviews',
+        {'rating': newRating, 'date': DateTime.now().toString()},
+        where: 'user_email = ? AND film_id = ?',
+        whereArgs: [email, filmId],
+      );
+    } else {
+      // INSERT jika belum ada
+      await db.insert('reviews', {
+        'user_email': email,
+        'film_id': filmId,
+        'rating': newRating,
+        'date': DateTime.now().toString(),
+      });
+    }
+  }
+
+  // 4. Ambil Rating Global (Rata-rata semua user)
+  Future<double> getGlobalRating(String filmTitle) async {
+    final db = await database;
+    final filmId = await _getFilmIdByName(filmTitle);
+
+    if (filmId == null) return 0.0;
+
+    final result = await db.rawQuery('''
+      SELECT AVG(rating) as avg_rating 
+      FROM reviews 
+      WHERE film_id = ?
+    ''', [filmId]);
+
+    if (result.isNotEmpty && result.first['avg_rating'] != null) {
+      return result.first['avg_rating'] as double;
+    }
+    return 0.0;
   }
 }

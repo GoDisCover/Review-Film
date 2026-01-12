@@ -10,6 +10,7 @@ import 'sqlite/database_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inisialisasi Database (Khusus Desktop/Mobile)
   if (!kIsWeb) {
     try {
       await _initializeDatabase();
@@ -17,10 +18,12 @@ void main() async {
       print('❌ Error initializing database: $e');
     }
   }
+
+  // Cek Login Session
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? savedEmail = prefs.getString('user_email');
 
-  runApp(MyApp(initialEmail : savedEmail));
+  runApp(MyApp(initialEmail: savedEmail));
 }
 
 Future<void> _initializeDatabase() async {
@@ -43,7 +46,9 @@ class MyApp extends StatelessWidget {
         primaryColor: const Color(0xFF4F4A3F),
         scaffoldBackgroundColor: const Color(0xFFD6D2C4),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F4A3F)),
+        useMaterial3: true,
       ),
+      // Jika ada email tersimpan -> MainScreen, jika tidak -> LoginPage
       home: initialEmail != null
           ? MainScreen(userEmail: initialEmail!)
           : const LoginPage(),
@@ -65,14 +70,14 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // List Halaman
     final List<Widget> children = [
-      MyReviewPage(),
-      SearchPage(),
+      MyReviewPage(userEmail: widget.userEmail),
+      SearchPage(userEmail: widget.userEmail),
       ProfilePage(userEmail: widget.userEmail),
     ];
 
     return Scaffold(
-      // Menggunakan IndexedStack untuk mempertahankan state halaman saat berpindah tab
       body: IndexedStack(
         index: _currentIndex,
         children: children,

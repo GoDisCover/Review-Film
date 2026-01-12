@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:review_film/model/film_model.dart';
 import 'package:review_film/sqlite/database_helper.dart';
 import 'package:review_film/widgets/film_card.dart';
-
 class MyReviewPage extends StatefulWidget {
   const MyReviewPage({super.key, this.userEmail});
+
   final String? userEmail;
+
   @override
   State<MyReviewPage> createState() => _MyReviewPageState();
 }
@@ -20,8 +21,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
     super.initState();
     _refreshData();
   }
-
-  void _refreshData() {
+  Future<void> _refreshData() async {
     setState(() {
       if (widget.userEmail != null && widget.userEmail!.isNotEmpty) {
         _filmsFuture = dbHelper.getMyFilms(widget.userEmail!);
@@ -58,7 +58,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
                 ),
                 child: TextField(
                   decoration: const InputDecoration(
-                    hintText: "Search Your Anime",
+                    hintText: "Search your review...",
                     hintStyle: TextStyle(color: Colors.grey),
                     prefixIcon: Icon(Icons.search, color: Colors.black54),
                     border: InputBorder.none,
@@ -81,7 +81,10 @@ class _MyReviewPageState extends State<MyReviewPage> {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text("You haven't added any films yet"),
+                      child: Text(
+                        "You haven't added any reviews yet",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     );
                   } else {
                     final films = snapshot.data!;
@@ -94,22 +97,29 @@ class _MyReviewPageState extends State<MyReviewPage> {
                     if (filteredFilms.isEmpty) {
                       return const Center(child: Text("Movie not found"));
                     }
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: GridView.builder(
-                        itemCount: filteredFilms.length,
-                        gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.65,
+                    return RefreshIndicator(
+                      onRefresh: _refreshData,
+                      color: const Color(0xFF57564F),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: filteredFilms.length,
+                          gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.65,
+                          ),
+                          itemBuilder: (BuildContext context, int index) {
+                            final Film film = filteredFilms[index];
+                            return FilmCard(
+                              film: film,
+                              userEmail: widget.userEmail ?? "",
+                            );
+                          },
                         ),
-                        itemBuilder: (BuildContext context, int index) {
-                          final Film film = filteredFilms[index];
-                          return FilmCard(film: film);
-                        },
                       ),
                     );
                   }
